@@ -8,7 +8,6 @@ public class MenuPanelController : MonoBehaviour {
     [Header("UI Panels")]
 	public GameObject mainPanel;
 	public GameObject settingsPanel;
-	public GameObject creditsPanel;
     public GameObject manPanel;
 
     public GameObject rankingPanel;
@@ -34,7 +33,6 @@ public class MenuPanelController : MonoBehaviour {
         ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
         mainPanel.SetActive(true);
 		settingsPanel.SetActive(false);
-        creditsPanel.SetActive(false);
         manPanel.SetActive(false);
     }
 
@@ -44,24 +42,14 @@ public class MenuPanelController : MonoBehaviour {
         ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
         mainPanel.SetActive(false);
         settingsPanel.SetActive(true);
-        creditsPanel.SetActive(false);
         manPanel.SetActive(false);
     }
-
-	public void CreditsButton () 
-	{
-        ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
-        mainPanel.SetActive(false);
-        settingsPanel.SetActive(false);
-        creditsPanel.SetActive(true);
-        manPanel.SetActive(false);
-    }
+    
     public void ManButton()
     {
         ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
         mainPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        creditsPanel.SetActive(false);
         manPanel.SetActive(true);
     }
 
