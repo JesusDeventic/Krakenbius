@@ -2,7 +2,6 @@
 using System.Collections;
 using models;
 using UnityEngine.UI;
-using UnityEngine.Experimental.Networking;
 using UnityEngine.Networking;
 
 public class RankingManager2 : MonoBehaviour {
