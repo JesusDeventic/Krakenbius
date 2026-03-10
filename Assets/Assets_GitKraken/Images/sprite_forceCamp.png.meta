@@ -75,7 +75,7 @@ TextureImporter:
       213: 21300046
     second: sprite_forceCamp_23
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
@@ -95,6 +95,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -103,9 +105,9 @@ TextureImporter:
   maxTextureSize: 1024
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
+    filterMode: 1
     aniso: 16
-    mipBias: -100
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -126,13 +128,29 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
   applyGammaDecoding: 1
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
     maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
@@ -660,6 +678,31 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      sprite_forceCamp_0: 21300000
+      sprite_forceCamp_1: 21300002
+      sprite_forceCamp_10: 21300020
+      sprite_forceCamp_11: 21300022
+      sprite_forceCamp_12: 21300024
+      sprite_forceCamp_13: 21300026
+      sprite_forceCamp_14: 21300028
+      sprite_forceCamp_15: 21300030
+      sprite_forceCamp_16: 21300032
+      sprite_forceCamp_17: 21300034
+      sprite_forceCamp_18: 21300036
+      sprite_forceCamp_19: 21300038
+      sprite_forceCamp_2: 21300004
+      sprite_forceCamp_20: 21300040
+      sprite_forceCamp_21: 21300042
+      sprite_forceCamp_22: 21300044
+      sprite_forceCamp_23: 21300046
+      sprite_forceCamp_3: 21300006
+      sprite_forceCamp_4: 21300008
+      sprite_forceCamp_5: 21300010
+      sprite_forceCamp_6: 21300012
+      sprite_forceCamp_7: 21300014
+      sprite_forceCamp_8: 21300016
+      sprite_forceCamp_9: 21300018
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
