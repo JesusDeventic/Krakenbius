@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using krakenScripts;
 
 public class ScoreManager : MonoBehaviour
 {
     [SerializeField] private GameObject PanelGameOver;
     [SerializeField] private string playerName = "Player";
-    [SerializeField] private int score = 0;
     [SerializeField] private float survivalSeconds = 0f;
     [SerializeField] private string gameVersion = "1.0";
     [SerializeField] private string gameMode = "normal";
@@ -53,10 +53,13 @@ public class ScoreManager : MonoBehaviour
     {
         hasSubmitted = true;
 
+        // OBTIENE EL SCORE DEL JUEGO
+        int currentScore = KrakenControl.score;
+
         ScorePayload payload = new ScorePayload
         {
             player_name = playerName,
-            score = score,
+            score = currentScore,
             survival_seconds = survivalSeconds,
             game_version = gameVersion,
             game_mode = gameMode
@@ -78,7 +81,7 @@ public class ScoreManager : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
                 Debug.LogError($"Error al enviar puntuación: {www.error}\nResponse: {www.downloadHandler.text}");
             else
-                Debug.Log($"Puntuación enviada: {www.downloadHandler.text}");
+                Debug.Log($"Puntuación {currentScore} enviada: {www.downloadHandler.text}");
         }
     }
 }
