@@ -5,58 +5,66 @@ using System.Collections;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] private GameObject panelGameOver;
-    [SerializeField] private string playerName = "Jesus";
+    [SerializeField] private GameObject PanelGameOver;
+    [SerializeField] private string playerName = "Player";
     [SerializeField] private int score = 0;
+    [SerializeField] private float survivalSeconds = 0f;
     [SerializeField] private string gameVersion = "1.0";
     [SerializeField] private string gameMode = "normal";
-    
+
     private bool hasSubmitted = false;
-    
+
+    [System.Serializable]
+    private class ScorePayload
+    {
+        public string player_name;
+        public int score;
+        public float survival_seconds;
+        public string game_version;
+        public string game_mode;
+    }
+
     private void Start()
     {
-        // Verifica que estamos en GameScene y que el panel existe
-        if (SceneManager.GetActiveScene().name == "GameScene" && panelGameOver != null)
+        if (SceneManager.GetActiveScene().name == "GameScene" && PanelGameOver != null)
         {
-            // Monitorea cuando se active el PanelGameOver
             StartCoroutine(MonitorPanelActivation());
         }
     }
-    
+
     private IEnumerator MonitorPanelActivation()
     {
-        // Espera hasta que el PanelGameOver se active
-        while (!panelGameOver.activeInHierarchy && !hasSubmitted)
-        {
+        while (!PanelGameOver.activeInHierarchy && !hasSubmitted)
             yield return null;
-        }
-        
+
         if (!hasSubmitted)
         {
             Debug.Log("PanelGameOver activado. Enviando puntuación...");
             SubmitScore();
         }
     }
-    
+
     private void SubmitScore()
     {
         StartCoroutine(SubmitScoreCoroutine());
     }
-    
+
     private IEnumerator SubmitScoreCoroutine()
     {
         hasSubmitted = true;
-        
-        var scoreData = new
+
+        ScorePayload payload = new ScorePayload
         {
             player_name = playerName,
             score = score,
+            survival_seconds = survivalSeconds,
             game_version = gameVersion,
             game_mode = gameMode
         };
-        
-        string jsonBody = JsonUtility.ToJson(scoreData);
-        
+
+        string jsonBody = JsonUtility.ToJson(payload);
+        Debug.Log($"JSON enviado: {jsonBody}"); 
+
         using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/submit-score", "POST"))
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
@@ -64,17 +72,13 @@ public class ScoreManager : MonoBehaviour
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
             www.SetRequestHeader("x-api-key", "krakenbius-apikey");
-            
+
             yield return www.SendWebRequest();
-            
+
             if (www.result != UnityWebRequest.Result.Success)
-            {
                 Debug.LogError($"Error al enviar puntuación: {www.error}\nResponse: {www.downloadHandler.text}");
-            }
             else
-            {
-                Debug.Log($"Puntuación enviada exitosamente: {www.downloadHandler.text}");
-            }
+                Debug.Log($"Puntuación enviada: {www.downloadHandler.text}");
         }
     }
 }
