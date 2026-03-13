@@ -11,22 +11,22 @@ public class CreateItems : MonoBehaviour {
 	public GameObject item_pull;
 	public GameObject item_merge;
 	public GameObject item_rebase;
-	public GameObject version_value;
-    public GameObject nextVersionEffectPrefab;
+	public GameObject stage_value;
+    public GameObject nextStageEffectPrefab;
 	public GameObject rebaseDummyEffectPrefab;
 
-	public int version; // fase
+	public int stage; // fase
 	public int level; // level of fase
 	public static float speed;
 	float seconds;
 
 	// Use this for initialization
 	void Start () {
-		version = 1;
+		stage = 1;
 		level = 0;
 		speed = 1f;
 		seconds = 1f;
-		version_value.GetComponent<Text>().text = "v " + version.ToString() + "." + level.ToString();
+		stage_value.GetComponent<Text>().text = "v " + stage.ToString() + "." + level.ToString();
 		StartCoroutine (GenerateItem());
 	}
 
@@ -50,25 +50,25 @@ public class CreateItems : MonoBehaviour {
 			else if (r >= 64 && r <= 100)
 				Instantiate (item_conflict);
 
-			if (krakenScripts.KrakenControl.score >= ((version - 1) * (500 * Mathf.Pow (1.5f, 10))) + (500 * Mathf.Pow (1.5f, level + 1))) {
+			if (krakenScripts.KrakenControl.score >= ((stage - 1) * (500 * Mathf.Pow (1.5f, 10))) + (500 * Mathf.Pow (1.5f, level + 1))) {
 				level++;
 
 				if (level == 10) {
-					NextVersion ();
+					NextStage ();
 				} 
 				else {
 					seconds -= 0.1f;
 				}
-				version_value.GetComponent<Text> ().text = "v " + version.ToString () + "." + level.ToString ();
-				print ("Level Up!! Version = " + version + ", Level = " + level + ", Speed = " + speed + ", Seconds = " + seconds);
+				stage_value.GetComponent<Text> ().text = "v " + stage.ToString () + "." + level.ToString ();
+				print ("Level Up!! stage = " + stage + ", Level = " + level + ", Speed = " + speed + ", Seconds = " + seconds);
 			}
 
 			yield return new WaitForSeconds (seconds);
 		}
 	}
 
-	void NextVersion () {
-		version ++;
+	void NextStage () {
+		stage ++;
 		level = 0;
 		speed += 0.2f;
 		seconds = 1f;
@@ -83,6 +83,6 @@ public class CreateItems : MonoBehaviour {
 			}
 			Destroy (items [i].gameObject);
 		}
-        Instantiate(nextVersionEffectPrefab, transform.position + new Vector3(0, -3, -1), Quaternion.identity);
+        Instantiate(nextStageEffectPrefab, transform.position + new Vector3(0, -3, -1), Quaternion.identity);
 	}
 }

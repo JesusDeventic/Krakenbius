@@ -16,18 +16,18 @@ public class AudioManager : MonoBehaviour {
 
     bool swapping = false;
 
-    private int version;
+    private int stage;
 
-    public int Version
+    public int Stage
     {
         get
         {
-            return version;
+            return stage;
         }
 
         set
         {
-            version = value;
+            stage = value;
             SwapSong();
         }
     }
@@ -73,12 +73,12 @@ public class AudioManager : MonoBehaviour {
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Version = createItems.version;
+                Stage = createItems.stage;
             }
 
-            if (version!=createItems.version)
+            if (stage!=createItems.stage)
             {
-                Version = createItems.version;
+                stage = createItems.stage;
             }
         }
     }
