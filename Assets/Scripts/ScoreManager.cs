@@ -9,9 +9,9 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private GameObject PanelGameOver;
     [SerializeField] private string playerName = "Player";
     [SerializeField] private float survivalSeconds = 0f;
-    [SerializeField] private string gameVersion = "1.0";
     [SerializeField] private string gameMode = "normal";
 
+    private string gameVersion;
     private bool hasSubmitted = false;
 
     [System.Serializable]
@@ -22,6 +22,12 @@ public class ScoreManager : MonoBehaviour
         public float survival_seconds;
         public string game_version;
         public string game_mode;
+    }
+
+    private void Awake()
+    {
+        gameVersion = Application.version;
+        Debug.Log($"Game version: {gameVersion}");
     }
 
     private void Start()
@@ -66,9 +72,11 @@ public class ScoreManager : MonoBehaviour
         };
 
         string jsonBody = JsonUtility.ToJson(payload);
-        Debug.Log($"JSON enviado: {jsonBody}"); 
+        Debug.Log($"JSON enviado: {jsonBody}");
 
-        using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/submit-score", "POST"))
+        using (UnityWebRequest www = new UnityWebRequest(
+            "https://retroteca.org/wp-json/krakenbius/v1/submit-score",
+            "POST"))
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
             www.uploadHandler = new UploadHandlerRaw(bodyRaw);
