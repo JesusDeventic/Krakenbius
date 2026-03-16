@@ -1,18 +1,46 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 using krakenScripts;
 
 public class ScoreManager : MonoBehaviour
 {
+    [Header("Panels")]
     [SerializeField] private GameObject PanelGameOver;
-    [SerializeField] private string playerName = "Player";
+    [SerializeField] private GameObject ContenedorDialogos; // Tu panel de diálogos para input nombre
+
+    [Header("Input Nombre en ContenedorDialogos")]
+    [SerializeField] private TMP_InputField inputNombre; // El InputField dentro de ContenedorDialogos
+    [SerializeField] private Button btnConfirmar; // El botón confirmar dentro de ContenedorDialogos
+
+    [Header("Datos")]
     [SerializeField] private float survivalSeconds = 0f;
     [SerializeField] private string gameMode = "normal";
 
+    private string playerName = "Player";
     private string gameVersion;
+    private int currentScore;
     private bool hasSubmitted = false;
+    private bool entersTop10 = false;
+
+    [System.Serializable]
+    private class CheckScorePayload
+    {
+        public int score;
+        public float survival_seconds;
+        public string game_version;
+        public string game_mode;
+    }
+
+    [System.Serializable]
+    private class CheckScoreResponse
+    {
+        public bool success;
+        public bool would_enter_top_10;
+    }
 
     [System.Serializable]
     private class ScorePayload
@@ -36,6 +64,12 @@ public class ScoreManager : MonoBehaviour
         {
             StartCoroutine(MonitorPanelActivation());
         }
+
+        // Configurar botón confirmar del ContenedorDialogos
+        if (btnConfirmar != null)
+        {
+            btnConfirmar.onClick.AddListener(OnConfirmarNombre);
+        }
     }
 
     private IEnumerator MonitorPanelActivation()
@@ -45,9 +79,79 @@ public class ScoreManager : MonoBehaviour
 
         if (!hasSubmitted)
         {
-            Debug.Log("PanelGameOver activado. Enviando puntuación...");
-            SubmitScore();
+            Debug.Log("PanelGameOver activado. Comprobando top 10...");
+            currentScore = KrakenControl.score;
+            yield return StartCoroutine(CheckTop10());
         }
+    }
+
+    private IEnumerator CheckTop10()
+    {
+        CheckScorePayload checkPayload = new CheckScorePayload
+        {
+            score = currentScore,
+            survival_seconds = survivalSeconds,
+            game_version = gameVersion,
+            game_mode = gameMode
+        };
+
+        string jsonCheck = JsonUtility.ToJson(checkPayload);
+        Debug.Log($"JSON check top10: {jsonCheck}");
+
+        using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/check-score", "POST"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonCheck);
+            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            www.downloadHandler = new DownloadHandlerBuffer();
+            www.SetRequestHeader("Content-Type", "application/json");
+            www.SetRequestHeader("x-api-key", "krakenbius-apikey");
+
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error check top10: {www.error}\nResponse: {www.downloadHandler.text}");
+                SubmitScore(); // Envía sin nombre si falla
+            }
+            else
+            {
+                CheckScoreResponse response = JsonUtility.FromJson<CheckScoreResponse>(www.downloadHandler.text);
+                Debug.Log($"Check top10 response: {www.downloadHandler.text}");
+
+                entersTop10 = response.success && response.would_enter_top_10;
+
+                if (entersTop10)
+                {
+                    Debug.Log("¡TOP 10! Abriendo ContenedorDialogos para nombre...");
+                    ShowContenedorDialogos();
+                }
+                else
+                {
+                    playerName = "Player";
+                    SubmitScore();
+                }
+            }
+        }
+    }
+
+    private void ShowContenedorDialogos()
+    {
+        if (ContenedorDialogos != null)
+        {
+            inputNombre.text = playerName; // "Player" por defecto
+            ContenedorDialogos.SetActive(true);
+            inputNombre.Select(); // Foco en el input
+            inputNombre.ActivateInputField();
+        }
+    }
+
+    private void OnConfirmarNombre()
+    {
+        playerName = string.IsNullOrWhiteSpace(inputNombre.text) ? "Player" : inputNombre.text;
+        Debug.Log($"Nombre para TOP 10: {playerName}");
+        
+        ContenedorDialogos.SetActive(false);
+        SubmitScore();
     }
 
     private void SubmitScore()
@@ -59,9 +163,6 @@ public class ScoreManager : MonoBehaviour
     {
         hasSubmitted = true;
 
-        // OBTIENE EL SCORE DEL JUEGO
-        int currentScore = KrakenControl.score;
-
         ScorePayload payload = new ScorePayload
         {
             player_name = playerName,
@@ -72,11 +173,9 @@ public class ScoreManager : MonoBehaviour
         };
 
         string jsonBody = JsonUtility.ToJson(payload);
-        Debug.Log($"JSON enviado: {jsonBody}");
+        Debug.Log($"JSON submit score: {jsonBody}");
 
-        using (UnityWebRequest www = new UnityWebRequest(
-            "https://retroteca.org/wp-json/krakenbius/v1/submit-score",
-            "POST"))
+        using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/submit-score", "POST"))
         {
             byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
             www.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -87,9 +186,9 @@ public class ScoreManager : MonoBehaviour
             yield return www.SendWebRequest();
 
             if (www.result != UnityWebRequest.Result.Success)
-                Debug.LogError($"Error al enviar puntuación: {www.error}\nResponse: {www.downloadHandler.text}");
+                Debug.LogError($"Error submit score: {www.error}\nResponse: {www.downloadHandler.text}");
             else
-                Debug.Log($"Puntuación {currentScore} enviada: {www.downloadHandler.text}");
+                Debug.Log($"Score {currentScore} de '{playerName}' enviado: {www.downloadHandler.text}");
         }
     }
 }
