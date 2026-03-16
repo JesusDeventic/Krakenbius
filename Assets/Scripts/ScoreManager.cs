@@ -10,11 +10,11 @@ public class ScoreManager : MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject PanelGameOver;
-    [SerializeField] private GameObject ContenedorDialogos; // Tu panel de diálogos para input nombre
+    [SerializeField] private GameObject ContenedorDialogos;
 
     [Header("Input Nombre en ContenedorDialogos")]
-    [SerializeField] private TMP_InputField inputNombre; // El InputField dentro de ContenedorDialogos
-    [SerializeField] private Button btnConfirmar; // El botón confirmar dentro de ContenedorDialogos
+    [SerializeField] private InputField inputNombre;
+    [SerializeField] private Button btnConfirmar; 
 
     [Header("Datos")]
     [SerializeField] private float survivalSeconds = 0f;
