@@ -140,7 +140,7 @@ public class ScoreManager : MonoBehaviour
         {
             inputNombre.text = playerName; // "Player" por defecto
             ContenedorDialogos.SetActive(true);
-            inputNombre.Select(); // Foco en el input
+            inputNombre.Select();
             inputNombre.ActivateInputField();
         }
     }
