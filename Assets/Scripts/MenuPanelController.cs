@@ -13,7 +13,6 @@ public class MenuPanelController : MonoBehaviour {
     public GameObject titlePanel;
 
     public GameObject exitButton;
-    public GameObject twitterButton;
     public GameObject confirmExitPanel;
 
     [Header("AudioManager")]
@@ -22,8 +21,6 @@ public class MenuPanelController : MonoBehaviour {
 #if !UNITY_ANDROID
     void Start()
     {
-        exitButton.SetActive(false);
-        twitterButton.SetActive(false);
     }
 #endif
     //*********************************************** BUTTON RETURN MAIN MENU *****************************************************
@@ -90,8 +87,4 @@ public void ManButton()
         confirmExitPanel.SetActive(false);
     }
 
-    public void GoToTwitter()
-    {
-        Application.OpenURL("");
-    }
 }
