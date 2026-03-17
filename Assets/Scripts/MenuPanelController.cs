@@ -32,6 +32,7 @@ public class MenuPanelController : MonoBehaviour {
 	{
         ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
         mainPanel.SetActive(true);
+        titlePanel.SetActive(true);
 		settingsPanel.SetActive(false);
         manPanel.SetActive(false);
     }
@@ -45,13 +46,21 @@ public class MenuPanelController : MonoBehaviour {
         manPanel.SetActive(false);
     }
     
-    public void ManButton()
+public void ManButton()
+{
+    ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
+    
+    // If ranking was opened before, close it first
+    if (rankingPanel.activeInHierarchy)
     {
-        ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
-        mainPanel.SetActive(false);
-        settingsPanel.SetActive(false);
-        manPanel.SetActive(true);
+        rankingPanel.SetActive(false);
     }
+    
+    // Now show man panel and hide others
+    mainPanel.SetActive(false);
+    settingsPanel.SetActive(false);
+    manPanel.SetActive(true);
+}
 
     public void PlayButton()
     {
