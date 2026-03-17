@@ -9,7 +9,6 @@ public class MenuPanelController : MonoBehaviour {
 	public GameObject mainPanel;
 	public GameObject settingsPanel;
     public GameObject manPanel;
-
     public GameObject rankingPanel;
     public GameObject titlePanel;
 
@@ -93,6 +92,6 @@ public void ManButton()
 
     public void GoToTwitter()
     {
-        Application.OpenURL("https://twitter.com/allinbyte/status/719536813896019968");
+        Application.OpenURL("");
     }
 }
