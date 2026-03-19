@@ -98,38 +98,39 @@ public class ScoreManager : MonoBehaviour
         string jsonCheck = JsonUtility.ToJson(checkPayload);
         Debug.Log($"JSON check top10: {jsonCheck}");
 
-        using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/check-score", "POST"))
+        // FIX WebGL: Usar UnityWebRequest.Post() en lugar de UploadHandler manual
+        using (UnityWebRequest www = UnityWebRequest.Post(
+            "https://retroteca.org/wp-json/krakenbius/v1/check-score", 
+            jsonCheck, 
+            "application/json"))
         {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonCheck);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
             www.SetRequestHeader("x-api-key", "krakenbius-apikey");
-
+            
             yield return www.SendWebRequest();
+
+            Debug.Log($"CheckTop10 result: {www.result}, error: {www.error}");
 
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error check top10: {www.error}\nResponse: {www.downloadHandler.text}");
                 SubmitScore(); // Envía sin nombre si falla
+                yield break;
+            }
+
+            Debug.Log($"Check top10 response RAW: {www.downloadHandler.text}");
+            
+            CheckScoreResponse response = JsonUtility.FromJson<CheckScoreResponse>(www.downloadHandler.text);
+            entersTop10 = response.success && response.would_enter_top_10;
+
+            if (entersTop10)
+            {
+                Debug.Log("¡TOP 10! Abriendo ContenedorDialogos para nombre...");
+                ShowContenedorDialogos();
             }
             else
             {
-                CheckScoreResponse response = JsonUtility.FromJson<CheckScoreResponse>(www.downloadHandler.text);
-                Debug.Log($"Check top10 response: {www.downloadHandler.text}");
-
-                entersTop10 = response.success && response.would_enter_top_10;
-
-                if (entersTop10)
-                {
-                    Debug.Log("¡TOP 10! Abriendo ContenedorDialogos para nombre...");
-                    ShowContenedorDialogos();
-                }
-                else
-                {
-                    playerName = "Player";
-                    SubmitScore();
-                }
+                playerName = "Player";
+                SubmitScore();
             }
         }
     }
@@ -175,12 +176,12 @@ public class ScoreManager : MonoBehaviour
         string jsonBody = JsonUtility.ToJson(payload);
         Debug.Log($"JSON submit score: {jsonBody}");
 
-        using (UnityWebRequest www = new UnityWebRequest("https://retroteca.org/wp-json/krakenbius/v1/submit-score", "POST"))
+        // FIX WebGL: Usar UnityWebRequest.Post() en lugar de UploadHandler manual
+        using (UnityWebRequest www = UnityWebRequest.Post(
+            "https://retroteca.org/wp-json/krakenbius/v1/submit-score", 
+            jsonBody, 
+            "application/json"))
         {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
             www.SetRequestHeader("x-api-key", "krakenbius-apikey");
 
             yield return www.SendWebRequest();
