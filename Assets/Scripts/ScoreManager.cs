@@ -25,6 +25,7 @@ public class ScoreManager : MonoBehaviour
     private int currentScore;
     private bool hasSubmitted = false;
     private bool entersTop10 = false;
+    private bool wasPanelGameOverVisible = false;
 
     [System.Serializable]
     private class CheckScorePayload
@@ -62,27 +63,62 @@ public class ScoreManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "GameScene" && PanelGameOver != null)
         {
-            StartCoroutine(MonitorPanelActivation());
+            // Verificar estado inicial DESPUÉS del primer frame
+            StartCoroutine(InitializePanelMonitoring());
         }
 
-        // Configurar botón confirmar del ContenedorDialogos
         if (btnConfirmar != null)
         {
             btnConfirmar.onClick.AddListener(OnConfirmarNombre);
         }
     }
 
+    private IEnumerator InitializePanelMonitoring()
+    {
+        // Esperar 1 frame para evitar el estado inicial erróneo
+        yield return null;
+        
+        wasPanelGameOverVisible = PanelGameOver.activeInHierarchy;
+        Debug.Log($"Estado inicial PanelGameOver: {wasPanelGameOverVisible}");
+        
+        if (!wasPanelGameOverVisible)
+        {
+            StartCoroutine(MonitorPanelActivation());
+        }
+    }
+
     private IEnumerator MonitorPanelActivation()
     {
-        while (!PanelGameOver.activeInHierarchy && !hasSubmitted)
-            yield return null;
-
-        if (!hasSubmitted)
+        Debug.Log("Esperando activación real de PanelGameOver...");
+        
+        while (!hasSubmitted)
         {
-            Debug.Log("PanelGameOver activado. Comprobando top 10...");
-            currentScore = KrakenControl.score;
-            yield return StartCoroutine(CheckTop10());
+            bool isCurrentlyVisible = PanelGameOver.activeInHierarchy;
+            
+            if (!wasPanelGameOverVisible && isCurrentlyVisible)
+            {
+                Debug.Log("PanelGameOver ACABÓ de activarse - ejecutando CheckTop10()");
+                ExecuteCheckTop10();
+                yield break; // Salir después de ejecutar
+            }
+            
+            wasPanelGameOverVisible = isCurrentlyVisible;
+            yield return null;
         }
+    }
+
+    private void ExecuteCheckTop10()
+    {
+        if (hasSubmitted)
+        {
+            Debug.Log("Score ya enviado - ignorando");
+            return;
+        }
+
+        currentScore = KrakenControl.score;
+        Debug.Log($"Ejecutando CheckTop10 con score: {currentScore}");
+        
+        StartCoroutine(CheckTop10());
     }
 
     private IEnumerator CheckTop10()
@@ -98,13 +134,12 @@ public class ScoreManager : MonoBehaviour
         string jsonCheck = JsonUtility.ToJson(checkPayload);
         Debug.Log($"JSON check top10: {jsonCheck}");
 
-        // FIX WebGL: Usar UnityWebRequest.Post() en lugar de UploadHandler manual
         using (UnityWebRequest www = UnityWebRequest.Post(
             "https://retroteca.org/wp-json/krakenbius/v1/check-score", 
             jsonCheck, 
             "application/json"))
         {
-            www.SetRequestHeader("x-api-key", "krakenbius-apikey");
+            www.SetRequestHeader("x-api-key", "deventic-games-apikey");
             
             yield return www.SendWebRequest();
 
@@ -113,7 +148,7 @@ public class ScoreManager : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error check top10: {www.error}\nResponse: {www.downloadHandler.text}");
-                SubmitScore(); // Envía sin nombre si falla
+                SubmitScore();
                 yield break;
             }
 
@@ -139,7 +174,7 @@ public class ScoreManager : MonoBehaviour
     {
         if (ContenedorDialogos != null)
         {
-            inputNombre.text = playerName; // "Player" por defecto
+            inputNombre.text = playerName;
             ContenedorDialogos.SetActive(true);
             inputNombre.Select();
             inputNombre.ActivateInputField();
@@ -176,13 +211,12 @@ public class ScoreManager : MonoBehaviour
         string jsonBody = JsonUtility.ToJson(payload);
         Debug.Log($"JSON submit score: {jsonBody}");
 
-        // FIX WebGL: Usar UnityWebRequest.Post() en lugar de UploadHandler manual
         using (UnityWebRequest www = UnityWebRequest.Post(
             "https://retroteca.org/wp-json/krakenbius/v1/submit-score", 
             jsonBody, 
             "application/json"))
         {
-            www.SetRequestHeader("x-api-key", "krakenbius-apikey");
+            www.SetRequestHeader("x-api-key", "deventic-games-apikey");
 
             yield return www.SendWebRequest();
 
