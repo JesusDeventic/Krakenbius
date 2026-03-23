@@ -14,7 +14,7 @@ public class ScoreManager : MonoBehaviour
 
     [Header("Input Nombre en ContenedorDialogos")]
     [SerializeField] private InputField inputNombre;
-    [SerializeField] private Button btnConfirmar; 
+    [SerializeField] private Button btnConfirmar;
 
     [Header("Datos")]
     [SerializeField] private float survivalSeconds = 0f;
@@ -89,7 +89,7 @@ public class ScoreManager : MonoBehaviour
         yield return null;
         wasPanelGameOverVisible = PanelGameOver.activeInHierarchy;
         Debug.Log($"Estado inicial PanelGameOver: {wasPanelGameOverVisible}");
-        
+
         if (!wasPanelGameOverVisible)
         {
             StartCoroutine(MonitorPanelActivation());
@@ -99,18 +99,18 @@ public class ScoreManager : MonoBehaviour
     private IEnumerator MonitorPanelActivation()
     {
         Debug.Log("Esperando activación real de PanelGameOver...");
-        
+
         while (!hasSubmitted)
         {
             bool isCurrentlyVisible = PanelGameOver.activeInHierarchy;
-            
+
             if (!wasPanelGameOverVisible && isCurrentlyVisible)
             {
                 Debug.Log("PanelGameOver ACABÓ de activarse - ejecutando CheckTop10()");
                 ExecuteCheckTop10();
                 yield break;
             }
-            
+
             wasPanelGameOverVisible = isCurrentlyVisible;
             yield return null;
         }
@@ -126,7 +126,7 @@ public class ScoreManager : MonoBehaviour
 
         currentScore = KrakenControl.score;
         Debug.Log($"Ejecutando CheckTop10 con score: {currentScore}");
-        
+
         StartCoroutine(CheckTop10());
     }
 
@@ -144,12 +144,12 @@ public class ScoreManager : MonoBehaviour
         Debug.Log($"JSON check top10: {jsonCheck}");
 
         using (UnityWebRequest www = UnityWebRequest.Post(
-            "https://retroteca.org/wp-json/krakenbius/v1/check-score", 
-            jsonCheck, 
+            "https://retroteca.org/wp-json/krakenbius/v1/check-score",
+            jsonCheck,
             "application/json"))
         {
             www.SetRequestHeader("x-api-key", "deventic-games-apikey");
-            
+
             yield return www.SendWebRequest();
 
             Debug.Log($"CheckTop10 result: {www.result}, error: {www.error}");
@@ -162,7 +162,7 @@ public class ScoreManager : MonoBehaviour
             }
 
             Debug.Log($"Check top10 response RAW: {www.downloadHandler.text}");
-            
+
             CheckScoreResponse response = JsonUtility.FromJson<CheckScoreResponse>(www.downloadHandler.text);
             entersTop10 = response.success && response.would_enter_top_10;
 
@@ -194,12 +194,12 @@ public class ScoreManager : MonoBehaviour
     {
         // VALIDACIÓN ESPACIOS: Quitar espacios por si acaso
         playerName = inputNombre.text.Replace(" ", "").Trim();
-        
+
         if (string.IsNullOrEmpty(playerName))
             playerName = "Player";
-            
+
         Debug.Log($"Nombre limpio para TOP 10: '{playerName}'");
-        
+
         ContenedorDialogos.SetActive(false);
         SubmitScore();
     }
@@ -226,8 +226,8 @@ public class ScoreManager : MonoBehaviour
         Debug.Log($"JSON submit score: {jsonBody}");
 
         using (UnityWebRequest www = UnityWebRequest.Post(
-            "https://retroteca.org/wp-json/krakenbius/v1/submit-score", 
-            jsonBody, 
+            "https://retroteca.org/wp-json/krakenbius/v1/submit-score",
+            jsonBody,
             "application/json"))
         {
             www.SetRequestHeader("x-api-key", "deventic-games-apikey");

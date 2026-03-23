@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
-public class AudioManager : MonoBehaviour {
+public class AudioManager : MonoBehaviour
+{
     public AudioSource base_1;
     public AudioSource base_2;
     public AudioClip[] audios;
@@ -36,7 +37,8 @@ public class AudioManager : MonoBehaviour {
         initVolume = base_1.volume;
     }
 
-    void Start () {
+    void Start()
+    {
         if (SceneManager.GetActiveScene().name.Equals("MainScene"))
         {
             menu_music.Play();
@@ -49,8 +51,9 @@ public class AudioManager : MonoBehaviour {
             createItems = Object.FindFirstObjectByType<CreateItems>();
         }
     }
-  
-    public void PitchBase() {
+
+    public void PitchBase()
+    {
         StartCoroutine(PitchBaseCoroutine());
     }
 
@@ -64,7 +67,7 @@ public class AudioManager : MonoBehaviour {
 
     void Update()
     {
-        if (createItems!=null)
+        if (createItems != null)
         {
             base_1.pitch = Mathf.Clamp(createItems.level * 0.005f + 1, 1, 1.3f);
             base_2.pitch = base_1.pitch;
@@ -74,7 +77,7 @@ public class AudioManager : MonoBehaviour {
                 Stage = createItems.stage;
             }
 
-            if (stage!=createItems.stage)
+            if (stage != createItems.stage)
             {
                 stage = createItems.stage;
             }
@@ -97,12 +100,12 @@ public class AudioManager : MonoBehaviour {
         base_2.clip = audios[audioIndex];
         base_2.Play();
         swapping = true;
-        float progress=0;
-        while (progress<1)
+        float progress = 0;
+        while (progress < 1)
         {
-            base_1.volume = Mathf.Lerp(initVolume, 0,progress);
+            base_1.volume = Mathf.Lerp(initVolume, 0, progress);
             base_2.volume = Mathf.Lerp(0, initVolume, progress);
-            progress += Time.deltaTime/(1*base_1.pitch);
+            progress += Time.deltaTime / (1 * base_1.pitch);
             yield return null;
         }
         AudioSource temp = base_1;

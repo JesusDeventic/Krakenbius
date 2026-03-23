@@ -28,7 +28,7 @@ namespace UnityStandardAssets.CrossPlatformInput.Inspector
         [MenuItem("Mobile Input/Enable", true)]
         private static bool EnableValidate()
         {
-            var defines = GetDefinesList(NamedBuildTarget.Android); 
+            var defines = GetDefinesList(NamedBuildTarget.Android);
             return !defines.Contains("MOBILE_INPUT");
         }
 

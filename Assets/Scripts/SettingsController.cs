@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 
-public class SettingsController : MonoBehaviour {
+public class SettingsController : MonoBehaviour
+{
 
     [Header("Audio Controll Buttons")]
     public Toggle musicButton;
@@ -43,8 +44,9 @@ public class SettingsController : MonoBehaviour {
         }
     }
 
-    // Use this for initialization
-    void Start () {
+    // Utilizar para inicializar
+    void Start()
+    {
         #region CheckAudioPrefs
         if (PlayerPrefs.HasKey("music"))
         {
@@ -85,10 +87,11 @@ public class SettingsController : MonoBehaviour {
         PlayerPrefs.Save();
     }
 
-    // Update is called once per frame
-    void Update () {
-	    
-	}
+    // Update se llama una vez por frame
+    void Update()
+    {
+
+    }
 
     public void toggleMusic()
     {
@@ -97,14 +100,14 @@ public class SettingsController : MonoBehaviour {
         {
             PlayerPrefs.SetInt("music", 1);
             audioMixer.SetFloat("MusicVolume", 0f);
-            //Show X music selector
+            //Enseña X music selector
             musicSelector.gameObject.SetActive(true);
         }
         else
         {
             PlayerPrefs.SetInt("music", 0);
             audioMixer.SetFloat("MusicVolume", -80f);
-            //Hide X music selector
+            //Esconde X music selector
             musicSelector.gameObject.SetActive(false);
         }
     }
@@ -116,14 +119,14 @@ public class SettingsController : MonoBehaviour {
         {
             PlayerPrefs.SetInt("effects", 1);
             audioMixer.SetFloat("EffectsVolume", 0f);
-            //Show X effects selector
+            //Enseña X effects selector
             effectsSelector.gameObject.SetActive(true);
         }
         else
         {
             PlayerPrefs.SetInt("effects", 0);
             audioMixer.SetFloat("EffectsVolume", -80f);
-            //Hide X effects selector
+            //Esconde X effects selector
             effectsSelector.gameObject.SetActive(false);
         }
     }

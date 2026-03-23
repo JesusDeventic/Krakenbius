@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ChangeMaterialOffset : MonoBehaviour {
+public class ChangeMaterialOffset : MonoBehaviour
+{
 
-    public Vector2 offsetSpeed=new Vector2(0,0.01f);
+    public Vector2 offsetSpeed = new Vector2(0, 0.01f);
 
     Material mat;
 
@@ -12,7 +13,7 @@ public class ChangeMaterialOffset : MonoBehaviour {
         mat = new Material(GetComponent<Renderer>().material);
         GetComponent<Renderer>().material = mat;
     }
-	void Update ()
+    void Update()
     {
         Vector2 offset = mat.mainTextureOffset;
         offset += offsetSpeed * Time.deltaTime;
@@ -21,5 +22,5 @@ public class ChangeMaterialOffset : MonoBehaviour {
         if (Mathf.Abs(offset.y) >= 1)
             offset.y -= Mathf.Sign(offset.y);
         mat.mainTextureOffset = offset;
-	}
+    }
 }

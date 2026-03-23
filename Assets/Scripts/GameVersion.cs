@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;       
+using UnityEngine.UI;
 
 public class GameVersionLabel : MonoBehaviour
 {
@@ -8,7 +8,7 @@ public class GameVersionLabel : MonoBehaviour
     private void Awake()
     {
         if (uiText == null)
-            uiText = GetComponent<Text>();        
+            uiText = GetComponent<Text>();
 
         uiText.text = "Game version: " + Application.version;
     }

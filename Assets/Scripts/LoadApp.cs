@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Audio;
 
-public class LoadApp : MonoBehaviour {
+public class LoadApp : MonoBehaviour
+{
 
     public AudioMixer audioMixer;
-
-	// Use this for initialization
-	void Start () 
-	{
-        if (!PlayerPrefs.HasKey("music")){
+    void Start()
+    {
+        if (!PlayerPrefs.HasKey("music"))
+        {
             PlayerPrefs.SetInt("music", 1);
         }
         if (!PlayerPrefs.HasKey("effects"))
