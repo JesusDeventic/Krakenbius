@@ -37,9 +37,17 @@ public class MenuPanelController : MonoBehaviour {
 	public void SettingsButton ()
 	{
         ((AudioSource)GameObject.Find("Mouse_Effect").GetComponent<AudioSource>()).Play();
-        mainPanel.SetActive(false);
-        settingsPanel.SetActive(true);
-        manPanel.SetActive(false);
+    // If ranking was opened before, close it first
+    if (rankingPanel.activeInHierarchy)
+    {
+        rankingPanel.SetActive(false);
+    }
+    
+    // Now show settings panel and hide others
+    mainPanel.SetActive(false);
+    manPanel.SetActive(false);
+    settingsPanel.SetActive(true);
+
     }
     
 public void ManButton()

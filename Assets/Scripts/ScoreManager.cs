@@ -63,7 +63,6 @@ public class ScoreManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "GameScene" && PanelGameOver != null)
         {
-            // Verificar estado inicial DESPUÉS del primer frame
             StartCoroutine(InitializePanelMonitoring());
         }
 
@@ -71,13 +70,23 @@ public class ScoreManager : MonoBehaviour
         {
             btnConfirmar.onClick.AddListener(OnConfirmarNombre);
         }
+
+        // VALIDACIÓN LETRAS: Solo letras/números SIN espacios/acentos
+        SetupInputFieldValidation();
+    }
+
+    private void SetupInputFieldValidation()
+    {
+        if (inputNombre != null)
+        {
+            inputNombre.characterValidation = InputField.CharacterValidation.Alphanumeric;  // Solo a-z A-Z 0-9
+            inputNombre.characterLimit = 8;  // Máximo 8 caracteres
+        }
     }
 
     private IEnumerator InitializePanelMonitoring()
     {
-        // Esperar 1 frame para evitar el estado inicial erróneo
         yield return null;
-        
         wasPanelGameOverVisible = PanelGameOver.activeInHierarchy;
         Debug.Log($"Estado inicial PanelGameOver: {wasPanelGameOverVisible}");
         
@@ -99,7 +108,7 @@ public class ScoreManager : MonoBehaviour
             {
                 Debug.Log("PanelGameOver ACABÓ de activarse - ejecutando CheckTop10()");
                 ExecuteCheckTop10();
-                yield break; // Salir después de ejecutar
+                yield break;
             }
             
             wasPanelGameOverVisible = isCurrentlyVisible;
@@ -174,18 +183,22 @@ public class ScoreManager : MonoBehaviour
     {
         if (ContenedorDialogos != null)
         {
-            inputNombre.text = playerName;
+            inputNombre.text = "";
             ContenedorDialogos.SetActive(true);
             inputNombre.Select();
             inputNombre.ActivateInputField();
-            
         }
     }
 
     private void OnConfirmarNombre()
     {
-        playerName = string.IsNullOrWhiteSpace(inputNombre.text) ? "Player" : inputNombre.text;
-        Debug.Log($"Nombre para TOP 10: {playerName}");
+        // VALIDACIÓN ESPACIOS: Quitar espacios por si acaso
+        playerName = inputNombre.text.Replace(" ", "").Trim();
+        
+        if (string.IsNullOrEmpty(playerName))
+            playerName = "Player";
+            
+        Debug.Log($"Nombre limpio para TOP 10: '{playerName}'");
         
         ContenedorDialogos.SetActive(false);
         SubmitScore();
