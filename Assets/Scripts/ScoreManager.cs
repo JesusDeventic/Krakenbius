@@ -178,6 +178,7 @@ public class ScoreManager : MonoBehaviour
             ContenedorDialogos.SetActive(true);
             inputNombre.Select();
             inputNombre.ActivateInputField();
+            
         }
     }
 

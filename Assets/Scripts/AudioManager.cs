@@ -4,7 +4,6 @@ using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour {
-
     public AudioSource base_1;
     public AudioSource base_2;
     public AudioClip[] audios;
@@ -36,8 +35,8 @@ public class AudioManager : MonoBehaviour {
     {
         initVolume = base_1.volume;
     }
-	// Use this for initialization
-	void Start () {
+
+    void Start () {
         if (SceneManager.GetActiveScene().name.Equals("MainScene"))
         {
             menu_music.Play();
@@ -47,12 +46,11 @@ public class AudioManager : MonoBehaviour {
         {
             base_1.Play();
             audioMixer.FindSnapshot("Base_1").TransitionTo(1f);
-            createItems = GameObject.FindObjectOfType<CreateItems>();
+            createItems = Object.FindFirstObjectByType<CreateItems>();
         }
-	}
-	
-	// Update is called once per frame
-	public void PitchBase() {
+    }
+  
+    public void PitchBase() {
         StartCoroutine(PitchBaseCoroutine());
     }
 
