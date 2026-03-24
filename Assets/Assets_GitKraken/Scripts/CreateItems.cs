@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class CreateItems : MonoBehaviour
 {
-
 	public GameObject item_conflict;
 	public GameObject item_branch;
 	public GameObject item_commit;
@@ -17,12 +16,11 @@ public class CreateItems : MonoBehaviour
 	public GameObject nextStageEffectPrefab;
 	public GameObject rebaseDummyEffectPrefab;
 
-	public int stage; // fase
-	public int level; // level of fase
+	public int stage; // Fase actual
+	public int level; // Nivel dentro de fase
 	public static float speed;
 	float seconds;
 
-	// Use this for initialization
 	void Start()
 	{
 		stage = 1;
@@ -33,9 +31,9 @@ public class CreateItems : MonoBehaviour
 		StartCoroutine(GenerateItem());
 	}
 
+	// Genera items aleatorios infinitamente con probabilidades: commit(20%), pull(9%), push(16%), merge(10%), branch(5%), rebase(3%), conflict(37%)
 	IEnumerator GenerateItem()
 	{
-
 		for (; ; )
 		{
 			int r = Random.Range(1, 101);
@@ -55,6 +53,7 @@ public class CreateItems : MonoBehaviour
 			else if (r >= 64 && r <= 100)
 				Instantiate(item_conflict);
 
+			// Progreso: cada 10 niveles > NextStage() ... cada nivel reduce tiempo de spawn (seconds -= 0.1f)
 			if (krakenScripts.KrakenControl.score >= ((stage - 1) * (500 * Mathf.Pow(1.5f, 10))) + (500 * Mathf.Pow(1.5f, level + 1)))
 			{
 				level++;
@@ -75,6 +74,7 @@ public class CreateItems : MonoBehaviour
 		}
 	}
 
+	// Avanza al siguiente stage: reinicia level=0, aumenta speed, destruye todos items con efectos especiales para Rebase
 	void NextStage()
 	{
 		stage++;

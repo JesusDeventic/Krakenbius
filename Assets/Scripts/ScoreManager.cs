@@ -71,10 +71,10 @@ public class ScoreManager : MonoBehaviour
             btnConfirmar.onClick.AddListener(OnConfirmarNombre);
         }
 
-        // VALIDACIÓN LETRAS: Solo letras/números SIN espacios/acentos
         SetupInputFieldValidation();
     }
 
+    // Configura InputField para aceptar solo alfanuméricos (sin espacios/acentos) y máximo 8 caracteres
     private void SetupInputFieldValidation()
     {
         if (inputNombre != null)
@@ -84,6 +84,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // Monitorea primer frame para capturar estado inicial del PanelGameOver
     private IEnumerator InitializePanelMonitoring()
     {
         yield return null;
@@ -96,6 +97,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // Vigila cada frame hasta detectar activación del PanelGameOver para iniciar proceso TOP10
     private IEnumerator MonitorPanelActivation()
     {
         Debug.Log("Esperando activación real de PanelGameOver...");
@@ -116,6 +118,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // Obtiene score actual del juego y verifica si entra en TOP10
     private void ExecuteCheckTop10()
     {
         if (hasSubmitted)
@@ -130,6 +133,7 @@ public class ScoreManager : MonoBehaviour
         StartCoroutine(CheckTop10());
     }
 
+    // 1. ENVÍA PETICIÓN HTTP para verificar si score entra en TOP10 del servidor
     private IEnumerator CheckTop10()
     {
         CheckScorePayload checkPayload = new CheckScorePayload
@@ -166,6 +170,7 @@ public class ScoreManager : MonoBehaviour
             CheckScoreResponse response = JsonUtility.FromJson<CheckScoreResponse>(www.downloadHandler.text);
             entersTop10 = response.success && response.would_enter_top_10;
 
+            // 2. SI ENTRA TOP10 → muestra diálogo nombre ... SINO → envía como "Player"
             if (entersTop10)
             {
                 Debug.Log("¡TOP 10! Abriendo ContenedorDialogos para nombre...");
@@ -179,6 +184,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // 3. Activa diálogo de entrada de nombre y enfoca InputField
     private void ShowContenedorDialogos()
     {
         if (ContenedorDialogos != null)
@@ -190,9 +196,9 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // 4. Limpia nombre (quita espacios), valida y envía score final al servidor
     private void OnConfirmarNombre()
     {
-        // VALIDACIÓN ESPACIOS: Quitar espacios por si acaso
         playerName = inputNombre.text.Replace(" ", "").Trim();
 
         if (string.IsNullOrEmpty(playerName))
@@ -204,11 +210,13 @@ public class ScoreManager : MonoBehaviour
         SubmitScore();
     }
 
+    // Inicia proceso final de envío de score al servidor
     private void SubmitScore()
     {
         StartCoroutine(SubmitScoreCoroutine());
     }
 
+    // 5. ENVÍA PETICIÓN HTTP FINAL con datos completos (nombre + score) al servidor de rankings
     private IEnumerator SubmitScoreCoroutine()
     {
         hasSubmitted = true;

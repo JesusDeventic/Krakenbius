@@ -11,19 +11,19 @@ public class RankingManager2 : MonoBehaviour
     
     void Start()
     {
-        StartCoroutine(LoadRanking());
+        StartCoroutine(LoadRanking());  // Inicia carga automática del ranking TOP10 al arrancar
     }
     
+    // Realiza petición HTTP GET al endpoint de leaderboard y procesa respuesta
     IEnumerator LoadRanking() 
     {
         using (UnityWebRequest www = UnityWebRequest.Get("https://retroteca.org/wp-json/krakenbius/v1/leaderboard?limit=10"))
         {
             www.SetRequestHeader("x-api-key", "krakenbius-apikey");
             
-            // Envía la petición y espera respuesta
             yield return www.SendWebRequest();
 
-            // Verifica si hubo algún error en la petición
+            // Manejo completo de errores HTTP con códigos y respuestas
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error al cargar ranking: {www.error} (Código: {www.responseCode})\nRespuesta: {www.downloadHandler.text}");
@@ -31,11 +31,12 @@ public class RankingManager2 : MonoBehaviour
             else 
             {
                 Debug.Log("Ranking cargado exitosamente");
-                DrawRanking(www.downloadHandler.text);
+                DrawRanking(www.downloadHandler.text);  // Parsea y renderiza TOP10
             }
         }
     }
 
+    // Parsea JSON con SimpleJSON > Limpia contenedor anterior > Instancia y popula prefab para cada jugador TOP10
     private void DrawRanking(string respuesta_json)
     {
         SimpleJSON.JSONNode jsonData = SimpleJSON.JSON.Parse(respuesta_json);
@@ -66,6 +67,7 @@ public class RankingManager2 : MonoBehaviour
             return;
         }
 
+        // Limpia items anteriores del contenedor
         foreach (Transform child in contenedorItems)
         {
             Destroy(child.gameObject);
@@ -73,7 +75,7 @@ public class RankingManager2 : MonoBehaviour
 
         int pos = 0;
         
-        // Itera sobre cada jugador del ranking
+        // Itera TOP10 jugadores: extrae nick/score > valida > instancia prefab > popula Texts por índice hijo
         foreach (SimpleJSON.JSONNode playerNode in playersArray)
         {
             SimpleJSON.JSONClass playerJson = playerNode as SimpleJSON.JSONClass;
@@ -86,7 +88,6 @@ public class RankingManager2 : MonoBehaviour
             string nick = playerJson["player_name"]?.Value ?? "N/A";
             string scoreStr = playerJson["score"]?.Value ?? "0";
             
-            // Convierte score a entero (compatible con clase Player existente)
             if (int.TryParse(scoreStr, out int score))
             {
                 if (prefabItemRanking != null)
@@ -94,7 +95,7 @@ public class RankingManager2 : MonoBehaviour
                     GameObject nuevoItem = Instantiate(prefabItemRanking);
                     nuevoItem.transform.SetParent(contenedorItems, false);
                     
-                    // Acceso seguro a los componentes Text (índices 0,1,2)
+                    // Acceso por índices de hijos del prefab (0=Pos, 1=Nick, 2=Score)
                     Text textoPosicion = nuevoItem.transform.GetChild(0).GetComponent<Text>();
                     Text textoNick = nuevoItem.transform.GetChild(1).GetComponent<Text>();
                     Text textoScore = nuevoItem.transform.GetChild(2).GetComponent<Text>();

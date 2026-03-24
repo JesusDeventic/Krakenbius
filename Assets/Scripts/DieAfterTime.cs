@@ -3,7 +3,6 @@ using System.Collections;
 
 public class DieAfterTime : MonoBehaviour
 {
-
     public float TimeToDie = 2;
 
     void Start()
@@ -11,6 +10,7 @@ public class DieAfterTime : MonoBehaviour
         StartCoroutine(CountDown());
     }
 
+    // Inicia cuenta regresiva y destruye GameObject tras tiempo especificado
     IEnumerator CountDown()
     {
         yield return new WaitForSeconds(TimeToDie);

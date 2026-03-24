@@ -15,16 +15,12 @@ public class AudioManager : MonoBehaviour
     private CreateItems createItems;
 
     bool swapping = false;
-
     private int stage;
 
+    // Cambia canción automáticamente cuando se modifica el stage
     public int Stage
     {
-        get
-        {
-            return stage;
-        }
-
+        get { return stage; }
         set
         {
             stage = value;
@@ -52,11 +48,13 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // Inicia corrutina para bajar pitch gradualmente usando AudioMixer
     public void PitchBase()
     {
         StartCoroutine(PitchBaseCoroutine());
     }
 
+    // Aplica snapshot de pitch bajo durante 2s y detiene ambas pistas de audio
     IEnumerator PitchBaseCoroutine()
     {
         audioMixer.FindSnapshot("Base_1_PitchDown").TransitionTo(2f);
@@ -84,6 +82,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // Inicia transición suave (crossfade) a la siguiente canción si no está en progreso
     public void SwapSong()
     {
         if (!swapping && base_1.isPlaying)
@@ -92,6 +91,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // Realiza crossfade de 1s entre canciones: fade out base_1, fade in base_2, luego intercambia roles
     IEnumerator SwapSongCoroutine()
     {
         audioIndex++;
@@ -114,6 +114,7 @@ public class AudioManager : MonoBehaviour
         swapping = false;
     }
 
+    // Pausa música principal y secundaria si está en transición
     public void pauseMusic()
     {
         base_1.Pause();
@@ -121,6 +122,7 @@ public class AudioManager : MonoBehaviour
             base_2.Pause();
     }
 
+    // Reanuda música desde el punto donde se pausó
     public void resumeMusic()
     {
         base_1.Play();

@@ -25,6 +25,7 @@ public class HUDPanelController : MonoBehaviour
     {
     }
 
+    // Alterna pausa/reanudar del juego: detiene tiempo, muestra/oculta paneles, pausa/reanuda música
     public void Pause()
     {
         if (gameOverPanel.activeInHierarchy)
@@ -50,6 +51,7 @@ public class HUDPanelController : MonoBehaviour
         }
     }
 
+    // Reinicia tiempo y carga escena principal (menú)
     public void Home()
     {
         Time.timeScale = 1;
@@ -57,11 +59,13 @@ public class HUDPanelController : MonoBehaviour
         Debug.Log("Go home");
     }
 
+    // Activa panel de Game Over
     public void GameOver()
     {
         gameOverPanel.SetActive(true);
     }
 
+    // Recarga escena actual del juego
     public void Restart()
     {
         SceneManager.LoadScene("GameScene");
