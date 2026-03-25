@@ -23,8 +23,11 @@ public class AudioManager : MonoBehaviour
         get { return stage; }
         set
         {
-            stage = value;
-            SwapSong();
+            if (value != stage) // Solo cambia si el valor es diferente
+            {
+                stage = value;
+                SwapSong();
+            }
         }
     }
 
@@ -63,25 +66,6 @@ public class AudioManager : MonoBehaviour
         base_2.Stop();
     }
 
-    void Update()
-    {
-        if (createItems != null)
-        {
-            base_1.pitch = Mathf.Clamp(createItems.level * 0.005f + 1, 1, 1.3f);
-            base_2.pitch = base_1.pitch;
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Stage = createItems.stage;
-            }
-
-            if (stage != createItems.stage)
-            {
-                stage = createItems.stage;
-            }
-        }
-    }
-
     // Inicia transición suave (crossfade) a la siguiente canción si no está en progreso
     public void SwapSong()
     {
@@ -92,27 +76,31 @@ public class AudioManager : MonoBehaviour
     }
 
     // Realiza crossfade de 1s entre canciones: fade out base_1, fade in base_2, luego intercambia roles
-    IEnumerator SwapSongCoroutine()
+IEnumerator SwapSongCoroutine()
+{
+    audioIndex++;
+    audioIndex %= audios.Length;
+    base_2.Stop();
+    base_2.clip = audios[audioIndex];
+    base_2.Play();
+    swapping = true;
+    float progress = 0;
+    float fadeDuration = 1f;
+    while (progress < 1)
     {
-        audioIndex++;
-        audioIndex %= audios.Length;
-        base_2.Stop();
-        base_2.clip = audios[audioIndex];
-        base_2.Play();
-        swapping = true;
-        float progress = 0;
-        while (progress < 1)
-        {
-            base_1.volume = Mathf.Lerp(initVolume, 0, progress);
-            base_2.volume = Mathf.Lerp(0, initVolume, progress);
-            progress += Time.deltaTime / (1 * base_1.pitch);
-            yield return null;
-        }
-        AudioSource temp = base_1;
-        base_1 = base_2;
-        base_2 = temp;
-        swapping = false;
+        progress += Time.deltaTime / fadeDuration;
+        progress = Mathf.Clamp01(progress);
+        
+        base_1.volume = Mathf.Lerp(initVolume, 0, progress);
+        base_2.volume = Mathf.Lerp(0, initVolume, progress);
+        yield return null;
     }
+    
+    AudioSource temp = base_1;
+    base_1 = base_2;
+    base_2 = temp;
+    swapping = false;
+}
 
     // Pausa música principal y secundaria si está en transición
     public void pauseMusic()

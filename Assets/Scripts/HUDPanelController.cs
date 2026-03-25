@@ -63,6 +63,7 @@ public class HUDPanelController : MonoBehaviour
     public void GameOver()
     {
         gameOverPanel.SetActive(true);
+        pauseButton.SetActive(false);
     }
 
     // Recarga escena actual del juego

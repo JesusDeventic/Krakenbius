@@ -74,13 +74,13 @@ public class ScoreManager : MonoBehaviour
         SetupInputFieldValidation();
     }
 
-    // Configura InputField para aceptar solo alfanuméricos (sin espacios/acentos) y máximo 8 caracteres
+    // Configura InputField para aceptar solo alfanuméricos (sin espacios/acentos) y máximo 12 caracteres
     private void SetupInputFieldValidation()
     {
         if (inputNombre != null)
         {
             inputNombre.characterValidation = InputField.CharacterValidation.Alphanumeric;  // Solo a-z A-Z 0-9
-            inputNombre.characterLimit = 8;  // Máximo 8 caracteres
+            inputNombre.characterLimit = 12;  // Máximo 12 caracteres
         }
     }
 
