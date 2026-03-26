@@ -27,12 +27,12 @@ public class ControlsTextUpdater : MonoBehaviour
         if (Application.platform == RuntimePlatform.WindowsPlayer || 
             Application.platform == RuntimePlatform.WindowsEditor)
         {
-            controlsText.text = "A    D\n/\n<-   ->";
+            controlsText.text = "A    D\n.\n<-   ->";
         }
         else if (Application.platform == RuntimePlatform.Android || 
                  Application.platform == RuntimePlatform.IPhonePlayer)
         {
-            controlsText.text = "Touch screen\n/\n<-   ->";
+            controlsText.text = "Touch screen\n.\nTap to rotate";
         }
         else
         {
