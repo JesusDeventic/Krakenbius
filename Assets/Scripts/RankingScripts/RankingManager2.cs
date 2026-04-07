@@ -2,111 +2,124 @@
 using System.Collections;
 using models;
 using UnityEngine.UI;
-using UnityEngine.Experimental.Networking;
 using UnityEngine.Networking;
 
-public class RankingManager2 : MonoBehaviour {
+public class RankingManager2 : MonoBehaviour 
+{
+    [Header("Configuración del Ranking")]
+    public GameObject prefabItemRanking;
+    
+    void Start()
+    {
+        StartCoroutine(LoadRanking());  // Inicia carga automática del ranking TOP10 al arrancar
+    }
+    
+    // Realiza petición HTTP GET al endpoint de leaderboard y procesa respuesta
+    IEnumerator LoadRanking() 
+    {
+        using (UnityWebRequest www = UnityWebRequest.Get("https://retroteca.org/wp-json/krakenbius/v1/leaderboard?limit=10"))
+        {
+            www.SetRequestHeader("x-api-key", "krakenbius-apikey");
+            
+            yield return www.SendWebRequest();
 
-	public GameObject prefabItemRanking;
-	private int pos;
+            // Manejo completo de errores HTTP con códigos y respuestas
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error al cargar ranking: {www.error} (Código: {www.responseCode})\nRespuesta: {www.downloadHandler.text}");
+            }
+            else 
+            {
+                Debug.Log("Ranking cargado exitosamente");
+                DrawRanking(www.downloadHandler.text);  // Parsea y renderiza TOP10
+            }
+        }
+    }
 
-	void Start(){
+    // Parsea JSON con SimpleJSON > Limpia contenedor anterior > Instancia y popula prefab para cada jugador TOP10
+    private void DrawRanking(string respuesta_json)
+    {
+        SimpleJSON.JSONNode jsonData = SimpleJSON.JSON.Parse(respuesta_json);
+        if (jsonData == null)
+        {
+            Debug.LogError("Error al parsear el JSON de respuesta");
+            return;
+        }
 
-		StartCoroutine (LoadRanking());
-	}
-		
+        SimpleJSON.JSONNode resultsNode = jsonData["results"];
+        if (resultsNode == null)
+        {
+            Debug.LogError("No se encontró el campo 'results' en el JSON");
+            return;
+        }
 
-	IEnumerator LoadRanking() {
+        SimpleJSON.JSONArray playersArray = resultsNode.AsArray;
+        if (playersArray == null)
+        {
+            Debug.LogError("El campo 'results' no es un array");
+            return;
+        }
 
-		UnityWebRequest www = UnityWebRequest.Get("http://51.254.134.174/webservices/gitkraken/ranking/LoadRanking.php");
-		yield return www.Send();
+        Transform contenedorItems = GameObject.Find("PlayersContainer")?.transform;
+        if (contenedorItems == null)
+        {
+            Debug.LogError("¡No se encontró 'PlayersContainer' en la escena!");
+            return;
+        }
 
-		if(www.isNetworkError) {
-			print ("Ojo con la implementación CORS de seguridad de JavaScript");
-		}
-		else {
-			DrawRanking (www.downloadHandler.text);
-		}
-	}
+        // Limpia items anteriores del contenedor
+        foreach (Transform child in contenedorItems)
+        {
+            Destroy(child.gameObject);
+        }
 
-	private void DrawRanking(string respuesta_json){
+        int pos = 0;
+        
+        // Itera TOP10 jugadores: extrae nick/score > valida > instancia prefab > popula Texts por índice hijo
+        foreach (SimpleJSON.JSONNode playerNode in playersArray)
+        {
+            SimpleJSON.JSONClass playerJson = playerNode as SimpleJSON.JSONClass;
+            if (playerJson == null) 
+            {
+                Debug.LogWarning($"Nodo inválido en posición {pos}");
+                continue;
+            }
 
-		SimpleJSON.JSONNode nodo_principal= SimpleJSON.JSON.Parse (respuesta_json);
+            string nick = playerJson["player_name"]?.Value ?? "N/A";
+            string scoreStr = playerJson["score"]?.Value ?? "0";
+            
+            if (int.TryParse(scoreStr, out int score))
+            {
+                if (prefabItemRanking != null)
+                {
+                    GameObject nuevoItem = Instantiate(prefabItemRanking);
+                    nuevoItem.transform.SetParent(contenedorItems, false);
+                    
+                    // Acceso por índices de hijos del prefab (0=Pos, 1=Nick, 2=Score)
+                    Text textoPosicion = nuevoItem.transform.GetChild(0).GetComponent<Text>();
+                    Text textoNick = nuevoItem.transform.GetChild(1).GetComponent<Text>();
+                    Text textoScore = nuevoItem.transform.GetChild(2).GetComponent<Text>();
 
+                    if (textoPosicion != null) 
+                        textoPosicion.text = (pos + 1).ToString();
+                    if (textoNick != null) 
+                        textoNick.text = nick.ToUpper();
+                    if (textoScore != null) 
+                        textoScore.text = score.ToString();
+                }
+                else
+                {
+                    Debug.LogWarning("PrefabItemRanking no está asignado en el Inspector");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Score inválido para jugador {nick}: {scoreStr}");
+            }
 
-		IEnumerator enumerator= nodo_principal.Childs.GetEnumerator ();
-		enumerator.MoveNext ();
-
-		Transform contenedorItems = GameObject.Find ("PlayersContainer").transform;
-
-		int pos = 0;
-
-		foreach (SimpleJSON.JSONClass player in ((SimpleJSON.JSONNode)enumerator.Current).AsArray) {
-
-			Player tmp = JsonUtility.FromJson(player.ToString(),typeof(Player)) as Player;
-
-			if(prefabItemRanking!=null){
-			GameObject nuevoItem = Instantiate (prefabItemRanking);
-			nuevoItem.transform.SetParent (contenedorItems, false);
-				nuevoItem.transform.GetChild (0).gameObject.GetComponent<Text> ().text = (pos+1).ToString();
-				nuevoItem.transform.GetChild (1).gameObject.GetComponent<Text>().text = tmp.nick.ToUpper();
-				nuevoItem.transform.GetChild (2).gameObject.GetComponent<Text> ().text = tmp.score.ToString ();
-			}
-
-			pos++;
-		}
-	}
-		
-
-	public IEnumerator CheckInRankingReq(int score, GameObject dialog) {
-
-		WWWForm formulario = new WWWForm ();
-		formulario.AddField ("score_player", krakenScripts.KrakenControl.score);
-
-		UnityWebRequest www = UnityWebRequest.Post("http://51.254.134.174/webservices/gitkraken/ranking/CheckInRanking.php",formulario);
-
-		yield return www.Send();
-
-		if(www.isNetworkError) {
-			print ("Ojo con la implementación CORS de seguridad de JavaScript");
-		}
-		else {
-			
-			DrawDialog (System.Convert.ToInt32(www.downloadHandler.text),dialog);
-		}
-	}
-
-
-	public void DrawDialog(int posEnRanking,GameObject dialog){
-	
-		print ("POSICION con "+krakenScripts.KrakenControl.score+" ese score= "+posEnRanking);
-
-		if (posEnRanking<11) {
-			dialog.SetActive (true);
-			Text aviso = GameObject.Find ("Aviso").GetComponent<Text> ();
-			aviso.text = "YOU ARE IN THE HALL OF FAME!\nPOSITION: "+posEnRanking;
-		}
-
-	}
-
-
-	public IEnumerator UpdateRanking(string nick, GameObject dialog) {
-
-		WWWForm formulario = new WWWForm ();
-		formulario.AddField ("nick_player", nick);
-		formulario.AddField ("score_player", krakenScripts.KrakenControl.score);
-
-		UnityWebRequest www = UnityWebRequest.Post("http://51.254.134.174/webservices/gitkraken/ranking/UpdateRanking.php",formulario);
-
-		yield return www.Send();
-
-		if(www.isNetworkError) {
-			print ("Ojo con la implementación CORS de seguridad de JavaScript");
-		}
-		else {
-			print ("Resultado de la insercion= " + www.downloadHandler.text);
-			dialog.SetActive (false);
-		}
-	}
-
+            pos++;
+        }
+        
+        Debug.Log($"Ranking dibujado exitosamente: {pos} jugadores");
+    }
 }

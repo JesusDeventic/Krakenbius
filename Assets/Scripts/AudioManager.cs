@@ -3,8 +3,8 @@ using System.Collections;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
-public class AudioManager : MonoBehaviour {
-
+public class AudioManager : MonoBehaviour
+{
     public AudioSource base_1;
     public AudioSource base_2;
     public AudioClip[] audios;
@@ -15,20 +15,19 @@ public class AudioManager : MonoBehaviour {
     private CreateItems createItems;
 
     bool swapping = false;
+    private int stage;
 
-    private int version;
-
-    public int Version
+    // Cambia canción automáticamente cuando se modifica el stage
+    public int Stage
     {
-        get
-        {
-            return version;
-        }
-
+        get { return stage; }
         set
         {
-            version = value;
-            SwapSong();
+            if (value != stage) // Solo cambia si el valor es diferente
+            {
+                stage = value;
+                SwapSong();
+            }
         }
     }
 
@@ -36,8 +35,9 @@ public class AudioManager : MonoBehaviour {
     {
         initVolume = base_1.volume;
     }
-	// Use this for initialization
-	void Start () {
+
+    void Start()
+    {
         if (SceneManager.GetActiveScene().name.Equals("MainScene"))
         {
             menu_music.Play();
@@ -47,15 +47,17 @@ public class AudioManager : MonoBehaviour {
         {
             base_1.Play();
             audioMixer.FindSnapshot("Base_1").TransitionTo(1f);
-            createItems = GameObject.FindObjectOfType<CreateItems>();
+            createItems = Object.FindFirstObjectByType<CreateItems>();
         }
-	}
-	
-	// Update is called once per frame
-	public void PitchBase() {
+    }
+
+    // Inicia corrutina para bajar pitch gradualmente usando AudioMixer
+    public void PitchBase()
+    {
         StartCoroutine(PitchBaseCoroutine());
     }
 
+    // Aplica snapshot de pitch bajo durante 2s y detiene ambas pistas de audio
     IEnumerator PitchBaseCoroutine()
     {
         audioMixer.FindSnapshot("Base_1_PitchDown").TransitionTo(2f);
@@ -64,25 +66,7 @@ public class AudioManager : MonoBehaviour {
         base_2.Stop();
     }
 
-    void Update()
-    {
-        if (createItems!=null)
-        {
-            base_1.pitch = Mathf.Clamp(createItems.level * 0.005f + 1, 1, 1.3f);
-            base_2.pitch = base_1.pitch;
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Version = createItems.version;
-            }
-
-            if (version!=createItems.version)
-            {
-                Version = createItems.version;
-            }
-        }
-    }
-
+    // Inicia transición suave (crossfade) a la siguiente canción si no está en progreso
     public void SwapSong()
     {
         if (!swapping && base_1.isPlaying)
@@ -91,28 +75,34 @@ public class AudioManager : MonoBehaviour {
         }
     }
 
-    IEnumerator SwapSongCoroutine()
+    // Realiza crossfade de 1s entre canciones: fade out base_1, fade in base_2, luego intercambia roles
+IEnumerator SwapSongCoroutine()
+{
+    audioIndex++;
+    audioIndex %= audios.Length;
+    base_2.Stop();
+    base_2.clip = audios[audioIndex];
+    base_2.Play();
+    swapping = true;
+    float progress = 0;
+    float fadeDuration = 1f;
+    while (progress < 1)
     {
-        audioIndex++;
-        audioIndex %= audios.Length;
-        base_2.Stop();
-        base_2.clip = audios[audioIndex];
-        base_2.Play();
-        swapping = true;
-        float progress=0;
-        while (progress<1)
-        {
-            base_1.volume = Mathf.Lerp(initVolume, 0,progress);
-            base_2.volume = Mathf.Lerp(0, initVolume, progress);
-            progress += Time.deltaTime/(1*base_1.pitch);
-            yield return null;
-        }
-        AudioSource temp = base_1;
-        base_1 = base_2;
-        base_2 = temp;
-        swapping = false;
+        progress += Time.deltaTime / fadeDuration;
+        progress = Mathf.Clamp01(progress);
+        
+        base_1.volume = Mathf.Lerp(initVolume, 0, progress);
+        base_2.volume = Mathf.Lerp(0, initVolume, progress);
+        yield return null;
     }
+    
+    AudioSource temp = base_1;
+    base_1 = base_2;
+    base_2 = temp;
+    swapping = false;
+}
 
+    // Pausa música principal y secundaria si está en transición
     public void pauseMusic()
     {
         base_1.Pause();
@@ -120,6 +110,7 @@ public class AudioManager : MonoBehaviour {
             base_2.Pause();
     }
 
+    // Reanuda música desde el punto donde se pausó
     public void resumeMusic()
     {
         base_1.Play();

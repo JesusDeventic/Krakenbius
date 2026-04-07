@@ -1,27 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RandomZRotation : MonoBehaviour {
-
-    public float minRotationSpeed=20;
+public class RandomZRotation : MonoBehaviour
+{
+    public float minRotationSpeed = 20;
     public float maxRotationSpeed = 50;
-
 
     float rotationSpeed;
     float timeRotating;
     int rotationDirection = 1;
+
     void Start()
     {
         rotationSpeed = Random.Range(minRotationSpeed, maxRotationSpeed);
-        timeRotating = Random.Range(5,20f);
+        timeRotating = Random.Range(5, 20f);
         StartCoroutine(ChangeRotation());
     }
-	
-	void Update ()
-    {
-        transform.Rotate(0,0,rotationDirection*rotationSpeed*Time.deltaTime);
-	}
 
+    // Rota objeto en eje Z con velocidad aleatoria y dirección actual
+    void Update()
+    {
+        transform.Rotate(0, 0, rotationDirection * rotationSpeed * Time.deltaTime);
+    }
+
+    // Cambia periódicamente velocidad, tiempo y invierte dirección de rotación
     IEnumerator ChangeRotation()
     {
         while (true)
@@ -31,6 +33,5 @@ public class RandomZRotation : MonoBehaviour {
             timeRotating = Random.Range(0, 20f);
             rotationDirection = -rotationDirection;
         }
-
     }
 }
